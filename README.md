@@ -2,7 +2,7 @@
 
 Dobot CR5 with Intel Realsense D435i for object detection and pose estimation (bin-picking application).
 
-This project is present the robot arm application especially bin-picking base on Dobot CR5 using ROS which detect an object and 6d pose estimation with intel realsense d435i depth camera by detection [find-object](https://introlab.github.io/find-object/) app.
+This project is present the robot arm application especially bin-picking base on Dobot CR5 using ROS which object detection and pose estimation with intel realsense d435i depth camera by detection [find-object](https://introlab.github.io/find-object/) tool.
 
 ## Requirement
 
@@ -93,4 +93,6 @@ source $HOME/catkin_ws/devel/setup.bash
 
 # References
 - **CR_ROS**: https://github.com/Dobot-Arm/CR_ROS
+- **Intel Realsense**: https://github.com/IntelRealSense/librealsense
 - **find-object**: https://github.com/introlab/find-object
+- **YOLOv5** : https://github.com/ultralytics/yolov5
