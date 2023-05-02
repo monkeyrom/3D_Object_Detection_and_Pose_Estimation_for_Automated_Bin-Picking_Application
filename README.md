@@ -21,7 +21,7 @@ cd $HOME/catkin_ws
 ```
 ### Installing Realsense-ROS
 
-You need to install realsense-ros to using realsense2_camera package. The step to installing realsense-ros shown [here](https://github.com/monkeyrom/realsense-ros).
+You need to install realsense-ros to using realsense2_camera package. The step to installing realsense-ros have shown [here](https://github.com/monkeyrom/realsense-ros).
 
 ### building
 ```sh
