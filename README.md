@@ -50,11 +50,11 @@ source $HOME/catkin_ws/devel/setup.bash
 
 ### rviz display
 
-![rviz display](./rviz.png)
+![rviz display](./pic/rviz.png)
 
 ### find object GUI
 
-![find-object](./findobject.png)
+![find-object](./pic/findobject.png)
 
 ## 2.  Add object image for detection
 
@@ -64,11 +64,11 @@ source $HOME/catkin_ws/devel/setup.bash
   - > take picture
   - > crop object
 
-![find-object with object](./findobject2.png)
+![find-object with object](./pic/findobject2.png)
 
 ### tf synchronize
 
-![rviz display tf](./rviz2.png)
+![rviz display tf](./pic/rviz2.png)
 
 ## 3.  Run a terminal for controlling robot
 
@@ -81,7 +81,7 @@ source $HOME/catkin_ws/devel/setup.bash
   - main_control
 
 ### new terminal for input command
-![new terminal](./maincontrol.png)
+![new terminal](./pic/maincontrol.png)
 
 ## Real Robotic Arm
 
