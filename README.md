@@ -86,10 +86,10 @@ source $HOME/catkin_ws/devel/setup.bash
 ## Real Robotic Arm
 
 ### Dobot CR5 
-![Dobot CR5](./dobot1.jpg)
+![Dobot CR5](./pic/dobot1.jpg)
 
 ### Intel Realsense D435i
-![Intel Realsense D435i](./dobot2.jpg)
+![Intel Realsense D435i](./pic/dobot2.jpg)
 
 # References
 - **CR_ROS**: https://github.com/Dobot-Arm/CR_ROS
