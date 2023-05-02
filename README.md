@@ -1,4 +1,4 @@
-# <center>CR5_Project</center>
+# <center>Bin-Picking Project</center>
 
 Dobot CR5 with Intel Realsense D435i for object detection and pose estimation (bin-picking application).
 
