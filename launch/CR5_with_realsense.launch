@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+
+<launch>
+<!-- CR5 Robot -->
+  <arg name="robot_ip" doc="IP of the controller" default="192.168.1.6"/>
+
+  <node name="$(env DOBOT_TYPE)_robot" pkg="dobot_bringup" type="dobot_bringup" output="screen" >
+    <param name="joint_publish_rate" type="double" value="10" />
+    <param name="trajectory_duration" type="double" value="0.3" />
+    <param name="robot_ip_address" type="str" value="$(arg robot_ip)"/>
+  </node>
+
+<!-- Robot Rviz Display -->
+  <arg name="model" />
+  <arg name="dobot_type" default="$(env DOBOT_TYPE)" doc="DOBOT_TYPE [cr3, cr5]" />
+
+  <param name="robot_description" textfile="$(find dobot_description)/urdf/$(arg dobot_type)_robot.urdf" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+<!-- Realsense camera -->
+  <arg name="serial_no"             default=""/>
+  <arg name="json_file_path"        default=""/>
+  <arg name="camera"                default="camera"/>
+
+  <group ns="$(arg camera)">
+    <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml">
+      <arg name="serial_no"         value="$(arg serial_no)"/>
+      <arg name="json_file_path"    value="$(arg json_file_path)"/>
+      <arg name="depth_width"       value="640"/>
+      <arg name="depth_height"      value="480"/>
+      <arg name="depth_fps"         value="30"/>
+      <arg name="color_width"       value="640"/>
+      <arg name="color_height"      value="480"/>
+      <arg name="color_fps"         value="30"/>
+      <arg name="enable_depth"      value="true"/>
+      <arg name="enable_color"      value="true"/>
+      <arg name="enable_infra1"     value="false"/>
+      <arg name="enable_infra2"     value="false"/>
+      <arg name="enable_fisheye"    value="false"/>
+      <arg name="enable_gyro"       value="false"/>
+      <arg name="enable_accel"      value="false"/>
+      <arg name="enable_pointcloud" value="true"/>
+      <arg name="enable_sync"       value="true"/>
+      <arg name="tf_prefix"         value="$(arg camera)"/>
+    </include>
+
+    <node name="rviz" pkg="rviz" type="rviz" args="-d /home/rom/catkin_ws/src/CR5_Project/config/Robot_pointcloud.rviz" required="true" />
+  </group>
+
+<!-- Detection (Find Object 3D) -->
+	<arg name="object_prefix" default="object"/>
+	<arg name="objects_path"  default=""/>
+	<arg name="gui"           default="true"/>
+	<arg name="approx_sync"   default="true"/>
+	<arg name="pnp"           default="true"/>
+	<arg name="tf_example"    default="true"/>
+	<arg name="settings_path" default="~/.ros/find_object_2d.ini"/>
+
+	<arg name="rgb_topic"         default="camera/color/image_raw"/>
+	<arg name="depth_topic"       default="camera/depth/image_rect_raw"/>
+	<arg name="camera_info_topic" default="camera/color/camera_info"/>
+	
+	<node name="find_object_3d" pkg="find_object_2d" type="find_object_2d" output="screen">
+		<param name="gui" value="$(arg gui)" type="bool"/>
+		<param name="settings_path" value="$(arg settings_path)" type="str"/>
+		<param name="subscribe_depth" value="true" type="bool"/>
+		<param name="objects_path" value="$(arg objects_path)" type="str"/>
+		<param name="object_prefix" value="$(arg object_prefix)" type="str"/>
+		<param name="approx_sync" value="$(arg approx_sync)" type="bool"/>
+    <param name="session_path" value="$(find CR5_Project)/find object/bin/session 10.bin" type="str"/>
+		<param name="pnp" value="$(arg pnp)" type="bool"/>
+		
+		<remap from="rgb/image_rect_color" to="$(arg rgb_topic)"/>
+		<remap from="depth_registered/image_raw" to="$(arg depth_topic)"/>
+		<remap from="depth_registered/camera_info" to="$(arg camera_info_topic)"/>
+	</node>
+	
+<!-- Example of tf synchronisation with the objectsStamped message -->
+	<node if="$(arg tf_example)" name="tf_example" pkg="find_object_2d" type="tf_example" output="screen">
+		<param name="object_prefix" value="$(arg object_prefix)" type="str"/>
+	</node>
+
+  <!-- <node pkg="CR5_Project" type="service_call" name="service_call_node"/> -->
+  
+</launch>

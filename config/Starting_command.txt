@@ -1,0 +1,8 @@
+roslaunch CR5_Project CR5_with_realsense.launch
+
+rosrun CR5_Project yolo_order.py
+
+sudo chmod a+rw /dev/ttyUSB0
+rosrun dobot DobotServer /dev/ttyUSB0
+
+rosrun CR5_Project service_call
