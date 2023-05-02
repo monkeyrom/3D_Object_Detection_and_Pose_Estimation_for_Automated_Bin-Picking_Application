@@ -67,13 +67,13 @@ source $HOME/catkin_ws/devel/setup.bash
 ## 3.  Run a terminal for running yolo node
 
 ```sh
-    rosrun CR5_Project yolo_order.launch
+    rosrun CR5_Project yolo_order.py
 ```
 
 ## 4.  Run a terminal for controlling robot
 
 ```sh
-    rosrun CR5_Project service_call.launch
+    rosrun CR5_Project service_call
 ```
 
 * this command will run 2 nodes and spawn new terminal for commanding
