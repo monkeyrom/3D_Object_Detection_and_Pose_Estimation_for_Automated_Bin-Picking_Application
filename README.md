@@ -54,8 +54,6 @@ source $HOME/catkin_ws/devel/setup.bash
 
 ### find object GUI
 
-![find-object](./pic/findobject.png)
-
 ## 2.  Add object image for detection
 
 * Using find object gui for adding image
@@ -64,13 +62,15 @@ source $HOME/catkin_ws/devel/setup.bash
   - > take picture
   - > crop object
 
-![find-object with object](./pic/findobject2.png)
-
 ### tf synchronize
 
-![rviz display tf](./pic/rviz2.png)
+## 3.  Run a terminal for running yolo node
 
-## 3.  Run a terminal for controlling robot
+```sh
+    rosrun CR5_Project yolo_order.launch
+```
+
+## 4.  Run a terminal for controlling robot
 
 ```sh
     rosrun CR5_Project service_call.launch
@@ -78,15 +78,13 @@ source $HOME/catkin_ws/devel/setup.bash
 
 * this command will run 2 nodes and spawn new terminal for commanding
   - service_call
-  - main_control
+  - node_order
 
 ### new terminal for input command
-![new terminal](./pic/maincontrol.png)
 
 ## Real Robotic Arm
 
 ### Dobot CR5 
-![Dobot CR5](./pic/dobot1.jpg)
 
 ### Intel Realsense D435i
 ![Intel Realsense D435i](./pic/dobot2.jpg)
