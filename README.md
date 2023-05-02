@@ -19,7 +19,7 @@ git clone https://github.com/introlab/find-object.git
 git clone https://github.com/monkeyrom/CR5_Project.git
 cd $HOME/catkin_ws
 ```
-###Installing Realsense-ROS
+### Installing Realsense-ROS
 <summary>
     Step 2: Install latest Intel&reg; RealSense&trade; SDK 2.0
   </summary>
