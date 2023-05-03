@@ -1,8 +1,10 @@
 # <center>Bin-Picking Project</center>
 
-Dobot CR5 with Intel Realsense D435i for object detection and pose estimation (bin-picking application).
+### Abstract. 
+Robotic arms have gained popularity in various industries due to their accuracy and efficiency in completing tasks. In this study, we propose a novel method for automatic bin-picking using the Dobot CR5 robotic arm, combining the state-of-the-art YOLOv5 CNN model for object detection and the FAST and BRISK feature detection and matching methods for object pose estimation. The system utilizes the Intel RealSense D435i camera to capture depth and colour images, which are used as input data for object detection and pose estimation. The YOLOv5 CNN model enables real-time object detection, while the FAST and BRISK methods estimate the pose of the object, allowing the robotic arm to pick the object at the correct position and orientation. The proposed method demonstrates promising results and shows the potential for revolutionizing the field of robotics, particularly in the context of industrial automation, by improving efficiency and accuracy in object manipulation tasks.
 
-This project is present the robot arm application especially bin-picking base on Dobot CR5 using ROS which object detection and pose estimation with intel realsense d435i depth camera by detection [find-object](https://introlab.github.io/find-object/) tool.
+*Keywords*: robotic arm, bin-picking, object detection, pose estimation, CNN
+
 
 ## Requirement
 
