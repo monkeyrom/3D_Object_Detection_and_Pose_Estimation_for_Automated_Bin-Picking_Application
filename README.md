@@ -72,7 +72,7 @@ source $HOME/catkin_ws/devel/setup.bash
     rosrun CR5_Project yolo_order.py
 ```
 
-* this command will run node.
+* this command will run node
   - yolo_listener
   
 ## 4.  Run a terminal for controlling robot
@@ -81,8 +81,8 @@ source $HOME/catkin_ws/devel/setup.bash
     rosrun CR5_Project service_call
 ```
 
-* this command will run 2 nodes and spawn new terminal for commanding.
-  - service_call
+* this command will run 2 nodes and spawn new terminal for commanding
+  - listener
   - main_order
 
 ### new terminal for input command
