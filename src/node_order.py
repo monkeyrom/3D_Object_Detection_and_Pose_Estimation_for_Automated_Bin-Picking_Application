@@ -1,0 +1,860 @@
+import rospy
+import numpy as np
+from std_msgs.msg import String
+from time import sleep
+import tf
+import math
+from CR5_Project.msg import ObjectMsg
+from tf.transformations import euler_from_quaternion
+
+def home():
+    cmd = "home"
+    pub_cmd.publish(cmd)
+    rospy.loginfo("Moving to Home Pose...")
+
+def Point5():
+    cmd = "Point5"
+    pub_cmd.publish(cmd)
+    print("Moving to Point 5...")
+
+def robot_home_pose(home):
+    #print('home checking...')
+    try :
+        listener.waitForTransform('base_link', 'Link6', rospy.Time(), rospy.Duration(0.2))
+    except :
+        return -1
+    
+    if listener.canTransform('base_link', 'Link6', rospy.Time()) :
+        (trans,rot) = listener.lookupTransform("base_link", "Link6", rospy.Time())
+        x = round(trans[0]*1000)
+        y = round(trans[1]*1000)
+        z = round(trans[2]*1000)
+        #print("robot pose at [", x,y,z,"]")
+        if abs(abs(x) - 143) <= 5 and abs(abs(y) - 580)  <= 5 and abs(abs(z) - 450) <= 5 :
+            home = 1
+        else :
+            #print('waiting robot to home position')
+            print('.')
+            home = 0      #change to 0,1 for pass home checking
+            sleep(0.2)
+    else :
+        home = -1
+
+    if rospy.is_shutdown():
+        print('Stop home Checking')
+        return 0
+    
+    return home
+
+def robot_check_pose(x_order,y_order,z_order):
+    print('pose checking ...')
+    pose = 0
+    listener.waitForTransform('base_link', 'Link6', rospy.Time(), rospy.Duration(0.2))
+    while pose == 0 :
+        
+        if listener.canTransform('base_link', 'Link6', rospy.Time()) :
+            (trans,rot) = listener.lookupTransform('base_link', 'Link6', rospy.Time())
+            x = round(trans[0]*1000)
+            y = round(trans[1]*1000)
+            z = round(trans[2]*1000)
+            #print("command pose at [", x_order,y_order,z_order,"]")
+            #print("robot pose at [", x,y,z,"]")
+            if abs(abs(x) - abs(x_order)) <= 4 and abs(abs(y) - abs(y_order))  <= 4 and abs(abs(z) - abs(z_order)) <= 4 :
+                pose = 1
+            else :
+                #print('waiting robot to the position')
+                print('.')
+                pose = 0        #change to 0,1 for pass pose checking
+        else :
+            print("Error : robot not found")
+            pose = -1
+
+        if rospy.is_shutdown():
+            print('Stop Pose Checking')
+            return 0
+        
+        sleep(0.2)
+    
+    return pose
+
+def robot_check_pose_round(x_order,y_order,z_order):
+    print('pose checking round...')
+    pose = 0
+    listener.waitForTransform('base_link', 'Link6', rospy.Time(), rospy.Duration(0.2))
+    while pose == 0 :
+        
+        if listener.canTransform('base_link', 'Link6', rospy.Time()) :
+            (trans,rot) = listener.lookupTransform('base_link', 'Link6', rospy.Time())
+            x = round(trans[0]*1000)
+            y = round(trans[1]*1000)
+            z = round(trans[2]*1000)
+            #print("command pose at [", x_order,y_order,z_order,"]")
+            #print("robot pose at [", x,y,z,"]")
+            if x - x_order <= 10 and y - y_order  <= 10 and abs(abs(z) - abs(z_order)) <= 10:
+                pose = 1
+            else :
+                #print('waiting robot to the position')
+                print('.')
+                pose = 0        #change to 0,1 for pass pose checking
+        else :
+            print("Error : robot not found")
+            pose = -1
+
+        if rospy.is_shutdown():
+            print('Stop Pose Checking')
+            return 0
+        
+        sleep(0.2)
+    
+    return pose
+
+def yolo_detect():
+    process = "Yolo detect at %s" % rospy.get_time()
+    cmd = "runYolo"
+    rospy.loginfo(process)
+    pub_order.publish(cmd)
+
+def find_object():
+    process = "Find Object at %s" % rospy.get_time()
+    cmd = "runFindObject"
+    rospy.loginfo(process)
+    pub_order.publish(cmd)
+
+def check_object():
+    obj = 0
+    source_frameid = 'base_link'
+    try :
+        listener.waitForTransform('obj_arduino', source_frameid, rospy.Time(), rospy.Duration(0.1)) # delay 100 milisec
+        if listener.canTransform('obj_arduino', source_frameid, rospy.Time()) == 1 :
+            obj = 1
+    except :
+        pass
+
+    try :
+        listener.waitForTransform('obj_raspi', source_frameid, rospy.Time(), rospy.Duration(0.1))   # delay 100 milisec
+        if listener.canTransform('obj_raspi', source_frameid, rospy.Time()) and obj == 0:
+            obj = 2
+        if listener.canTransform('obj_raspi', source_frameid, rospy.Time()) and obj == 1:
+            obj = 3
+    except :
+        pass
+
+    else :
+        print("cannot Transform object reffer to robot baselink")
+
+    return obj
+
+def move_close (focus_obj):
+    if focus_obj == 1 :
+        source_frameid = 'base_link'
+        target_frameid = 'obj_arduino'
+        listener.waitForTransform(target_frameid, source_frameid, rospy.Time(), rospy.Duration(0.1))    # delay 100 milisec
+        if listener.canTransform(target_frameid, source_frameid, rospy.Time()) :
+            (trans,rot) = listener.lookupTransform(source_frameid, target_frameid, rospy.Time())
+            x = round(trans[0]*1000) - 20
+            y = round(trans[1]*1000) + 50
+            z = round(trans[2]*1000) + 220
+            
+        else :
+            print("Error : object lost")
+            return
+
+    elif focus_obj == 2 :
+        source_frameid = 'base_link'
+        target_frameid = 'obj_raspi'
+        listener.waitForTransform(source_frameid, target_frameid, rospy.Time(), rospy.Duration(0.1))    # delay 100 milisec
+        if listener.canTransform(source_frameid, target_frameid, rospy.Time()) :
+            (trans,rot) = listener.lookupTransform(source_frameid, target_frameid, rospy.Time())
+            x = round(trans[0]*1000)
+            y = round(trans[1]*1000) + 50
+            z = round(trans[2]*1000) + 220
+        else :
+            print("Error : object lost")
+            return
+
+    target = ObjectMsg()
+    target.x = x
+    target.y = y
+    target.z = z
+    target.rx = 180
+    target.ry = 0
+    target.rz = 180
+    #rospy.loginfo(target)
+    print("(",x,y,z,"180 0 180 )")
+    pub_target.publish(target)
+
+    return (x,y,z)
+
+def compute_vector_100(x,y,z,ry,rx,rz):
+    # Convert the orientation from degrees to radians
+    rx = math.radians(rx)
+    ry = math.radians(ry)
+    rz = math.radians(rz)
+
+    # Define the position and orientation of the object
+    object_pos = np.array([x, y, z])  # Object position in world frame
+    object_ori = np.array([ry, rx, rz])  # Object orientation in world frame (euler angles)
+
+    # Convert the object orientation from euler angles to a rotation matrix
+    Rx = np.array([[1, 0, 0],
+                [0, np.cos(object_ori[1]), -np.sin(object_ori[1])],
+                [0, np.sin(object_ori[1]), np.cos(object_ori[1])]])
+    Ry = np.array([[np.cos(object_ori[0]), 0, np.sin(object_ori[0])],
+                [0, 1, 0],
+                [-np.sin(object_ori[0]), 0, np.cos(object_ori[0])]])
+    Rz = np.array([[np.cos(object_ori[2]), -np.sin(object_ori[2]), 0],
+                [np.sin(object_ori[2]), np.cos(object_ori[2]), 0],
+                [0, 0, 1]])
+    object_rot = Rz.dot(Ry.dot(Rx))
+
+    # Define the desired position of the robot relative to the object frame
+    p_o_desired = np.array([0, 0, -47])  # 100mm above the object in the object frame
+
+    # Transform the position vector from the object frame to the world frame
+    p_w_desired = object_rot.dot(p_o_desired) + object_pos
+    x = p_w_desired[0]
+    y = p_w_desired[1]
+    z = p_w_desired[2]
+    if z < 31 :
+        z = 31
+    elif 31 < z < 37 :
+        z = 31
+    else:
+        z = z
+
+    return (x,y,z)
+
+def compute_vector_120(x,y,z,ry,rx,rz):
+    # Convert the orientation from degrees to radians
+    rx = math.radians(rx)
+    ry = math.radians(ry)
+    rz = math.radians(rz)
+
+    # Define the position and orientation of the object
+    object_pos = np.array([x, y, z])  # Object position in world frame
+    object_ori = np.array([ry, rx, rz])  # Object orientation in world frame (euler angles)
+
+    # Convert the object orientation from euler angles to a rotation matrix
+    Rx = np.array([[1, 0, 0],
+                [0, np.cos(object_ori[1]), -np.sin(object_ori[1])],
+                [0, np.sin(object_ori[1]), np.cos(object_ori[1])]])
+    Ry = np.array([[np.cos(object_ori[0]), 0, np.sin(object_ori[0])],
+                [0, 1, 0],
+                [-np.sin(object_ori[0]), 0, np.cos(object_ori[0])]])
+    Rz = np.array([[np.cos(object_ori[2]), -np.sin(object_ori[2]), 0],
+                [np.sin(object_ori[2]), np.cos(object_ori[2]), 0],
+                [0, 0, 1]])
+    object_rot = Rz.dot(Ry.dot(Rx))
+
+    # Define the desired position of the robot relative to the object frame
+    p_o_desired = np.array([0, 0, -50])  # 100mm above the object in the object frame
+
+    # Transform the position vector from the object frame to the world frame
+    p_w_desired = object_rot.dot(p_o_desired) + object_pos
+    x = round(p_w_desired[0])
+    y = round(p_w_desired[1])
+    z = round(p_w_desired[2])
+    if z < 39 :
+        z = 39
+    else:
+        z = z
+
+    return (x,y,z)
+
+def compute_vector_150(x,y,z,ry,rx,rz):
+    # Convert the orientation from degrees to radians
+    rx = math.radians(rx)
+    ry = math.radians(ry)
+    rz = math.radians(rz)
+
+    # Define the position and orientation of the object
+    object_pos = np.array([x, y, z])  # Object position in world frame
+    object_ori = np.array([ry, rx, rz])  # Object orientation in world frame (euler angles)
+
+    # Convert the object orientation from euler angles to a rotation matrix
+    Rx = np.array([[1, 0, 0],
+                [0, np.cos(object_ori[1]), -np.sin(object_ori[1])],
+                [0, np.sin(object_ori[1]), np.cos(object_ori[1])]])
+    Ry = np.array([[np.cos(object_ori[0]), 0, np.sin(object_ori[0])],
+                [0, 1, 0],
+                [-np.sin(object_ori[0]), 0, np.cos(object_ori[0])]])
+    Rz = np.array([[np.cos(object_ori[2]), -np.sin(object_ori[2]), 0],
+                [np.sin(object_ori[2]), np.cos(object_ori[2]), 0],
+                [0, 0, 1]])
+    object_rot = Rz.dot(Ry.dot(Rx))
+
+    # Define the desired position of the robot relative to the object frame
+    p_o_desired = np.array([0, 0, -100])  # 150mm above the object in the object frame
+
+    # Transform the position vector from the object frame to the world frame
+    p_w_desired = object_rot.dot(p_o_desired) + object_pos
+    x = round(p_w_desired[0])
+    y = round(p_w_desired[1])
+    z = round(p_w_desired[2])
+    if z < 33 :
+        z = 33
+    else:
+        z = z
+
+    return (x,y,z)
+
+def pick_phase1 (focus_obj):
+    if focus_obj == 1 :
+        source_frameid = 'base_link'
+        camera_frameid = 'camera_link'
+        target_frameid1 = 'object_6'
+        target_frameid2 = 'object_6_b'
+        target_frameid3 = 'object_6_c'
+        target_frameid4 = 'object_6_d'
+        multi = 0
+        try :
+            listener.waitForTransform(camera_frameid, source_frameid, rospy.Time(), rospy.Duration(0.2))    # delay 200 milisec
+            listener.waitForTransform(target_frameid1, source_frameid, rospy.Time(), rospy.Duration(0.1))   # delay 100 milisec
+            if listener.canTransform(target_frameid1, source_frameid, rospy.Time()):
+                multi = multi + 1
+                print("multi = ", multi)
+        except :
+            print('no object_a')
+        try :
+            listener.waitForTransform(target_frameid2, source_frameid, rospy.Time(), rospy.Duration(0.1))   # delay 100 milisec
+            if listener.canTransform(target_frameid2, source_frameid, rospy.Time()):
+                multi = multi + 1
+                print("multi = ", multi)
+        except :
+            print('no object_b')
+        try :
+            listener.waitForTransform(target_frameid3, source_frameid, rospy.Time(), rospy.Duration(0.1))   # delay 100 milisec
+            if listener.canTransform(target_frameid3, source_frameid, rospy.Time()):
+                multi = multi + 1
+                print("multi = ", multi)
+        except :
+            print('no object_c')
+        '''try :
+            listener.waitForTransform(target_frameid4, source_frameid, rospy.Time(), rospy.Duration(0.1))
+            if listener.canTransform(target_frameid4, source_frameid, rospy.Time()):
+                multi = multi + 1
+                print("multi = ", multi)
+        except :
+            print('no object_d')'''
+
+        #try : 
+        if multi == 1:
+                print("found 1 object")
+                echo_transform = listener.lookupTransform(source_frameid, target_frameid1, rospy.Time(0))
+                echo_cam = listener.lookupTransform(target_frameid1, camera_frameid, rospy.Time(0))
+                yaw, pitch, roll = euler_from_quaternion(echo_cam[1])
+                v = echo_transform[0]
+
+                x = float(v[0] * 1000)
+                y = float(v[1] * 1000)
+                z = float(v[2] * 1000)
+                rx = float(roll * 180.0 / math.pi)
+                ry = float(pitch * 180.0 / math.pi)
+                rz = float(yaw * 180.0 / math.pi)
+
+                x_cal = x
+                y_cal = y
+                z_cal = z
+                rx_cal = ry
+                ry_cal = rx
+                rz_cal = rz
+
+        elif multi == 2:
+                print("found 2 objects")
+                echo_transform1 = listener.lookupTransform(source_frameid, target_frameid1, rospy.Time(0))
+                echo_cam1 = listener.lookupTransform(target_frameid1, camera_frameid, rospy.Time(0))
+                echo_transform2 = listener.lookupTransform(source_frameid, target_frameid2, rospy.Time(0))
+                echo_cam2 = listener.lookupTransform(target_frameid2, camera_frameid, rospy.Time(0))
+                yaw1, pitch1, roll1 = euler_from_quaternion(echo_cam1[1])
+                v1 = echo_transform1[0]
+                yaw2, pitch2, roll2 = euler_from_quaternion(echo_cam2[1])
+                v2 = echo_transform2[0]
+                
+                x1 = float(v1[0] * 1000)
+                y1 = float(v1[1] * 1000)
+                z1 = float(v1[2] * 1000)
+                rx1 = float(roll1 * 180.0 / math.pi)
+                ry1 = float(pitch1 * 180.0 / math.pi)
+                rz1 = float(yaw1 * 180.0 / math.pi)
+
+                x2 = float(v2[0] * 1000)
+                y2 = float(v2[1] * 1000)
+                z2 = float(v2[2] * 1000)
+                rx2 = float(roll2 * 180.0 / math.pi)
+                ry2 = float(pitch2 * 180.0 / math.pi)
+                rz2 = float(yaw2 * 180.0 / math.pi)
+                #print(x1,y1,z1,rx1,ry1,rz1)
+                #print(x2,y2,z2,rx2,ry2,rz2)
+                if z1 >= z2 :
+                    x_cal = x1
+                    y_cal = y1
+                    z_cal = z1
+                    rx_cal = ry1
+                    ry_cal = rx1
+                    rz_cal = rz1
+                    
+                elif z2 > z1 :
+                    x_cal = x2
+                    y_cal = y2
+                    z_cal = z2
+                    rx_cal = ry2
+                    ry_cal = rx2
+                    rz_cal = rz2
+                    
+        elif multi == 3:
+                print("found 3 objects")
+                echo_transform1 = listener.lookupTransform(source_frameid, target_frameid1, rospy.Time(0))
+                echo_cam1 = listener.lookupTransform(target_frameid1, camera_frameid, rospy.Time(0))
+                #print("tf 1")
+                echo_transform2 = listener.lookupTransform(source_frameid, target_frameid2, rospy.Time(0))
+                echo_cam2 = listener.lookupTransform(target_frameid2, camera_frameid, rospy.Time(0))
+                #print("tf 2")
+                echo_transform3 = listener.lookupTransform(source_frameid, target_frameid3, rospy.Time(0))
+                echo_cam3 = listener.lookupTransform(target_frameid3, camera_frameid, rospy.Time(0))
+                #print("tf 3")
+                yaw1, pitch1, roll1 = euler_from_quaternion(echo_cam1[1])
+                v1 = echo_transform1[0]
+                yaw2, pitch2, roll2 = euler_from_quaternion(echo_cam2[1])
+                v2 = echo_transform2[0]
+                yaw3, pitch3, roll3 = euler_from_quaternion(echo_cam3[1])
+                v3 = echo_transform3[0]
+
+                x1 = float(v1[0] * 1000)
+                y1 = float(v1[1] * 1000)
+                z1 = float(v1[2] * 1000)
+                rx1 = float(roll1 * 180.0 / math.pi)
+                ry1 = float(pitch1 * 180.0 / math.pi)
+                rz1 = float(yaw1 * 180.0 / math.pi)
+
+                x2 = float(v2[0] * 1000)
+                y2 = float(v2[1] * 1000)
+                z2 = float(v2[2] * 1000)
+                rx2 = float(roll2 * 180.0 / math.pi)
+                ry2 = float(pitch2 * 180.0 / math.pi)
+                rz2 = float(yaw2 * 180.0 / math.pi)
+
+                x3 = float(v3[0] * 1000)
+                y3 = float(v3[1] * 1000)
+                z3 = float(v3[2] * 1000)
+                rx3 = float(roll3 * 180.0 / math.pi)
+                ry3 = float(pitch3 * 180.0 / math.pi)
+                rz3 = float(yaw3 * 180.0 / math.pi)
+
+                if z1 > z2 and z1 > z3:
+                    x_cal = x1
+                    y_cal = y1
+                    z_cal = z1
+                    rx_cal = ry1
+                    ry_cal = rx1
+                    rz_cal = rz1
+                elif z2 > z1 and z2 > z3:
+                    x_cal = x2
+                    y_cal = y2
+                    z_cal = z2
+                    rx_cal = ry2
+                    ry_cal = rx2
+                    rz_cal = rz2
+                elif z3 > z1 and z3 > z2:
+                    x_cal = x3
+                    y_cal = y3
+                    z_cal = z3
+                    rx_cal = ry3
+                    ry_cal = rx3
+                    rz_cal = rz3
+
+        elif multi == 4:
+                print("found 4 objects")
+                echo_transform1 = listener.lookupTransform(source_frameid, target_frameid1, rospy.Time(0))
+                echo_cam1 = listener.lookupTransform(target_frameid1, camera_frameid, rospy.Time(0))
+                echo_transform2 = listener.lookupTransform(source_frameid, target_frameid2, rospy.Time(0))
+                echo_cam2 = listener.lookupTransform(target_frameid2, camera_frameid, rospy.Time(0))
+                echo_transform3 = listener.lookupTransform(source_frameid, target_frameid3, rospy.Time(0))
+                echo_cam3 = listener.lookupTransform(target_frameid3, camera_frameid, rospy.Time(0))
+                echo_transform4 = listener.lookupTransform(source_frameid, target_frameid4, rospy.Time(0))
+                echo_cam4 = listener.lookupTransform(target_frameid4, camera_frameid, rospy.Time(0))
+                yaw1, pitch1, roll1 = euler_from_quaternion(echo_cam1[1])
+                v1 = echo_transform1[0]
+                yaw2, pitch2, roll2 = euler_from_quaternion(echo_cam2[1])
+                v2 = echo_transform2[0]
+                yaw3, pitch3, roll3 = euler_from_quaternion(echo_cam3[1])
+                v3 = echo_transform3[0]
+                yaw4, pitch4, roll4 = euler_from_quaternion(echo_cam4[1])
+                v4 = echo_transform4[0]
+
+                x1 = float(v1[0] * 1000)
+                y1 = float(v1[1] * 1000)
+                z1 = float(v1[2] * 1000)
+                rx1 = float(roll1 * 180.0 / math.pi)
+                ry1 = float(pitch1 * 180.0 / math.pi)
+                rz1 = float(yaw1 * 180.0 / math.pi)
+
+                x2 = float(v2[0] * 1000)
+                y2 = float(v2[1] * 1000)
+                z2 = float(v2[2] * 1000)
+                rx2 = float(roll2 * 180.0 / math.pi)
+                ry2 = float(pitch2 * 180.0 / math.pi)
+                rz2 = float(yaw2 * 180.0 / math.pi)
+
+                x3 = float(v3[0] * 1000)
+                y3 = float(v3[1] * 1000)
+                z3 = float(v3[2] * 1000)
+                rx3 = float(roll3 * 180.0 / math.pi)
+                ry3 = float(pitch3 * 180.0 / math.pi)
+                rz3 = float(yaw3 * 180.0 / math.pi)
+
+                x4 = float(v4[0] * 1000)
+                y4 = float(v4[1] * 1000)
+                z4 = float(v4[2] * 1000)
+                rx4 = float(roll4 * 180.0 / math.pi)
+                ry4 = float(pitch4 * 180.0 / math.pi)
+                rz4 = float(yaw4 * 180.0 / math.pi)
+
+                if z1 > z2 and z1 > z3 and z1 > z4:
+                    x_cal = x1
+                    y_cal = y1
+                    z_cal = z1
+                    rx_cal = ry1 
+                    ry_cal = rx1
+                    rz_cal = rz1
+                elif z2 > z1 and z2 > z3 and z2 > z4:
+                    x_cal = x2
+                    y_cal = y2
+                    z_cal = z2
+                    rx_cal = ry2 
+                    ry_cal = rx2
+                    rz_cal = rz2
+                elif z3 > z1 and z3 > z2 and z3 > z4:
+                    x_cal = x3
+                    y_cal = y3
+                    z_cal = z3
+                    rx_cal = ry3
+                    ry_cal = rx3
+                    rz_cal = rz3
+                elif z4 > z1 and z4 > z2 and z4 > z3:
+                    x_cal = x4
+                    y_cal = y4
+                    z_cal = z4
+                    rx_cal = ry4
+                    ry_cal = rx4
+                    rz_cal = rz4
+
+        elif multi == 0:
+                return -1
+        
+        print(x_cal,y_cal,z_cal,ry_cal,rx_cal,rz_cal)
+        rx_robo = rx_cal + 180
+        ry_robo = -(ry_cal - 180)
+        rz_robo = rz_cal + 180
+
+        robo_compute = compute_vector_150(x_cal,y_cal,z_cal,ry_cal,rx_cal,rz_cal)
+
+            #print("publishing")
+        target = ObjectMsg()
+        target.x = robo_compute[0]
+        target.y = robo_compute[1]
+        target.z = robo_compute[2]
+        target.rx = rx_robo
+        target.ry = ry_robo
+        target.rz = rz_robo
+            #rospy.loginfo(target)
+            #print(target)
+        pub_target.publish(target)
+            #print("returning ",x_cal,y_cal,z_cal,ry_cal,rx_cal,rz_cal)
+        return (x_cal,y_cal,z_cal,ry_cal,rx_cal,rz_cal)
+            
+        #except:
+        #    return -1
+
+    elif focus_obj == 2 :
+        return -1
+
+def pick_phase2 (x,y,z,rx,ry,rz):
+    x_cal = x
+    y_cal = y
+    z_cal = z
+    rx_cal = ry
+    ry_cal = rx
+    rz_cal = rz
+
+    rx_robo = rx_cal + 180
+    ry_robo = -(ry_cal - 180)
+    rz_robo = rz_cal + 180
+    #print(rx_cal,ry_cal,rz_cal)
+    if abs(rx_cal) > 10 :
+        robo_compute = compute_vector_120(x_cal,y_cal,z_cal,rx,ry,rz)
+        print("more than 10 degree")
+    else :
+        robo_compute = compute_vector_100(x_cal,y_cal,z_cal,rx,ry,rz)
+        print("less than 10 degree")
+
+    target = ObjectMsg()
+    target.x = robo_compute[0]
+    target.y = robo_compute[1]
+    target.z = robo_compute[2]
+    target.rx = rx_robo
+    target.ry = ry_robo
+    target.rz = rz_robo
+    #rospy.loginfo(target)
+    print("(",robo_compute[0],robo_compute[1],robo_compute[2],rx_robo,ry_robo,rz_robo,")")
+    pub_target.publish(target)
+    return (robo_compute[0],robo_compute[1],robo_compute[2],rx_robo,ry_robo,rz_robo)
+
+def pick_phase3 (x,y,z,rx,ry,rz):
+    x_cal = x
+    y_cal = y
+    z_cal = z
+    rx_cal = rx
+    ry_cal = ry
+    rz_cal = rz
+
+    target = ObjectMsg()
+    target.x = x_cal
+    target.y = y_cal
+    target.z = z_cal + 100
+    target.rx = rx_cal
+    target.ry = ry_cal
+    target.rz = rz_cal
+    #rospy.loginfo(target)
+    pub_target.publish(target)
+    return (x_cal,y_cal,z_cal+100)
+
+def sunction_cup(set):
+    if set == 1 :
+        msg = "SetVac"
+        pub_cmd.publish(msg)
+        print("Set Robot Tool0 (Vacuum)...\n")
+    elif set == 0 :
+        msg = "ResetVac"
+        pub_cmd.publish(msg)
+        print("Reset Robot Tool0 (Vacuum)...\n")
+    return 0
+
+def start_order():
+    # Initial parameter
+    step = 0
+    focus_obj = 0
+    while True :
+        home_check = robot_home_pose(0)
+        if step == 0 and home_check == -1 :         # Check Robot and not found
+            print("Error : no robot found")
+            break
+        elif step == 0 and home_check == 0 :        # Check Robot and Robot not at home position
+            step = 0
+        elif step == 0 and home_check == 1 :        # Check Robot and Robot at home position
+            yolo_detect()                           # publish to yolo node to detect
+            sleep(0.2)                              # sleep 200 milisec
+            if check_object() == 1 :                # echo tf found Arduino
+                print("found obj_arduino")
+                step = 1
+                focus_obj = 1
+            elif check_object() == 2 :              # echo tf found Raspi
+                print("found obj_raspi")
+                step = 1
+                focus_obj = 2
+            elif check_object() == 3 :              # echo tf found Arduino and Raspi
+                print("found both obj_arduino and obj_raspi")
+                step = 1
+                focus_obj = 1
+            else :
+                print("no object found")            # echo tf not found object
+                step = 0
+        
+        elif step == 1 :                            # move close to the object
+            obj_target = move_close(focus_obj)
+            x_order = obj_target[0]
+            y_order = obj_target[1]
+            z_order = obj_target[2]
+            pose_check = robot_check_pose(x_order,y_order,z_order)
+            print ("robot close to object")
+            #find_object()
+            sleep(0.5)                              # sleep 1000 milisec swiching algorithm
+            if pose_check == 1 :                    # Robot at position (close to object)
+                step = 2
+            if pose_check == -1 :
+                break
+            if pose_check == 0 :
+                break
+        
+        elif step == 2 :                                # Robot close to object echo tf again and going to pick
+            obj_target1 = pick_phase1(focus_obj)        # echo object position and move to 3 cm above object
+            print(obj_target1)
+            if obj_target1 == -1:                       # Object lost
+                home()
+                print("step = 2 >> back home")
+                robot_home_pose(0)
+                sleep(0.5)                              # sleep 500 milisec
+                step = 0
+                pass
+            else :
+                x = obj_target1[0]
+                y = obj_target1[1]
+                z = obj_target1[2]
+                rx = obj_target1[3]
+                ry = obj_target1[4]
+                rz = obj_target1[5]
+                sleep(1)                                          # sleep 800 milisec
+                if pose_check == 1 :
+                    obj_target2 = pick_phase2(x,y,z,rx,ry,rz)       # Robot at the position ( mm above object)
+                    sunction_cup(1)                                 # Set sunction cup on
+                    sleep(0.5)                                      # sleep 500 milisec
+                    print ("robot picking object")
+                    if pose_check == 1 :
+                        print ('Picked object')
+                        pick_phase3(obj_target2[0],obj_target2[1],obj_target2[2],obj_target2[3],obj_target2[4],obj_target2[5])
+                        sleep(0.8)                                    # sleep 800 milisec
+                        step = 3
+                    if pose_check == -1 :
+                        break
+                    if pose_check == 0 :
+                        break   
+                if pose_check == -1 :
+                    break
+        
+        elif step == 3 :                                    # go to inventory
+            Point5()                                        # move robot to inventory
+            pose_check = robot_check_pose_round(-210,-580,150)    # check robot at inventory
+            sunction_cup(0)                                 # Set sunction cup off    
+            sleep(0.2)                                      # sleep 300 milisec
+            step = 4    
+
+        elif step == 4 :
+            home()
+            robot_home_pose(0)
+            sleep(0.1)                                      # sleep 100 milisec
+            step = 0
+                    
+        if rospy.is_shutdown():
+            print('Shutdown main loop')
+            break
+
+def start_service():
+    print("Started rosrun CR5_Project node_order")
+    print("\n================")
+    print("    SUMMARY")
+    print("================")
+    print("\nThis program use for controlling CR5 Robot, still in developing stage.")
+    print("The purpose of this project is to ...")
+    print("\n================")
+    print(" SERVICE LISTS")
+    print("================")
+    print("* Home           (Moving robot to home position)")
+    print("* Pose           (Moving robot to x,y,z input)")
+    print("* EnableRobot")
+    print("* DisableRobot")
+    print("* ClearError")
+    print("* Sleep          (Moving robot to sleep position)")
+    print("* SetVac         (Activate the vacuum)") 
+    print("* ResetVac       (Deactivate the vacuum)") 
+    print("* Point0         (Set all robot joints to 0)")
+    print("* Point1         (Moving robot to point 1)")    
+    print("* Point5         (Moving robot to point 5)")
+    print("* S              (Set SpeedJ to 100)")
+    print("* A              (Set AccJ to 100)") 
+    print("* yolo           (Run Yolo detection)")
+    print("* find           (Run Find Object detection)")
+    print("* PickingLoop    (Starting picking loop)\n")
+
+    while True:
+        service = input("Please type your service: ")
+        if service == "Pose":
+            print("Input position to publish")
+            position_x = float(input("position.x: "))
+            position_y = float(input("position.y: "))
+            position_z = float(input("position.z: "))
+            msg.x = position_x
+            msg.y = position_y
+            msg.z = position_z
+            msg.rx = 180
+            msg.ry = 0
+            msg.rz = 180
+            pub_target.publish(msg)
+        elif service == "Home":
+            msg = "home"
+            pub_cmd.publish(msg)
+            print("Robot moving to Home Pose...\n")
+        elif service == "Sleep":
+            msg = "sleep"
+            pub_cmd.publish(msg)
+            print("Robot moving to Sleep Pose...\n")
+        elif service == "ClearError":
+            msg = "ClearError"
+            pub_cmd.publish(msg)
+            print("Published Clear Error ...\n")
+        elif service == "DisableRobot":
+            msg = "DisableRobot"
+            pub_cmd.publish(msg)
+            print("Published Disable Robot...\n")
+        elif service == "EnableRobot":
+            msg = "EnableRobot"
+            pub_cmd.publish(msg)
+            print("Published Enable Robot...\n")
+        elif service == "Point0":
+            msg = "Point0"
+            pub_cmd.publish(msg)
+            print("Set all robot joints to 0...\n")
+        elif service == "Point1":
+            msg = "Point1"
+            pub_cmd.publish(msg)
+            print("Moving to Point 1...\n")
+        elif service == "Point2":
+            msg = "Point2"
+            pub_cmd.publish(msg)
+            print("Moving to Point 2...\n")
+        elif service == "Point3":
+            msg = "Point2"
+            pub_cmd.publish(msg)
+            print("Moving to Point 3...\n")
+        elif service == "Point5":
+            msg = "Point5"
+            pub_cmd.publish(msg)
+            print("Moving to Point 5...\n")
+        elif service == "SetVac":
+            msg = "SetVac"
+            pub_cmd.publish(msg)
+            print("Set Robot Tool0 (Vacuum)...\n")
+        elif service == "ResetVac":
+            msg = "ResetVac"
+            pub_cmd.publish(msg)
+            print("Reset Robot Tool0 (Vacuum)...\n")
+        elif service == "S":
+            msg = "Speed100"
+            pub_cmd.publish(msg)
+            print("SpeedJ to 100\n")
+        elif service == "A":
+            msg = "Acc100"
+            pub_cmd.publish(msg)
+            print("AccJ to 100\n")
+        elif service == "yolo":
+            print("main/yolo_order...\n")
+            cmd = "runYolo"
+            pub_order.publish(cmd)
+        elif service == "find":
+            print("main/find_order...\n")
+            cmd = "runFindObject"
+            find_order.publish(cmd)
+        elif service == "PickingLoop":
+            print("Starting picking loop...\n")
+            start_order()
+        elif service == "P":
+            print("Starting picking loop...\n")
+            start_order()
+        else :
+            print("ERROR: command not found \n")
+
+        if rospy.is_shutdown():
+            print("Stop Service")
+            break
+    return 0
+
+if __name__ == "__main__":
+    
+    rospy.init_node('main_order', anonymous=True)
+    listener = tf.TransformListener()
+    pub_order = rospy.Publisher('main/yolo_order', String, queue_size=10)
+    pub_target = rospy.Publisher('main/target_order', ObjectMsg, queue_size=10)
+    pub_cmd = rospy.Publisher('main/cmd_talker', String, queue_size=10)
+    find_order = rospy.Publisher('main/find_order', String, queue_size=10)
+    try:
+        start_service()
+    except rospy.ROSInterruptException:
+        pass
