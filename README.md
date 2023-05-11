@@ -19,7 +19,6 @@ cd $HOME/catkin_ws/src
 git clone https://github.com/Dobot-Arm/CR_ROS.git
 git clone https://github.com/introlab/find-object.git
 git clone https://github.com/monkeyrom/CR5_Project.git
-cd $HOME/catkin_ws
 ```
 ### Installing Realsense-ROS
 
@@ -27,7 +26,8 @@ You need to install realsense-ros to using realsense2_camera package. The step t
 
 ### building
 ```sh
-catkin_make
+cd $HOME/catkin_ws/src/Bin-Picking
+catkin build
 ```
 ### set the dobot type
 ```sh
