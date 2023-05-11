@@ -151,8 +151,8 @@ include
 #   ${catkin_LIBRARIES}
 # )
 
-add_executable(main_control src/main_control.cpp)
-target_link_libraries(main_control ${catkin_LIBRARIES})
+#add_executable(main_control src/main_control.cpp)
+#target_link_libraries(main_control ${catkin_LIBRARIES})
 #add_dependencies(main_control beginner_tutorials_generate_messages_cpp)
 
 add_executable(service_call src/service_call.cpp)
