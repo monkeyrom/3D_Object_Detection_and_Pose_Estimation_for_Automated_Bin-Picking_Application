@@ -6,7 +6,7 @@
 
   <node name="$(env DOBOT_TYPE)_robot" pkg="dobot_bringup" type="dobot_bringup" output="screen" >
     <param name="joint_publish_rate" type="double" value="10" />
-    <param name="trajectory_duration" type="double" value="0.3" />
+    <param name="trajectory_duration" type="double" value="0.3" />      <!-- Defualt 0.3 -->
     <param name="robot_ip_address" type="str" value="$(arg robot_ip)"/>
   </node>
 
