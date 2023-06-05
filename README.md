@@ -3,7 +3,8 @@
 ### Abstract
 Robotic arms have gained popularity in various industries due to their accuracy and efficiency in completing tasks. In this study, we propose a method for automating bin-picking tasks using the Dobot CR5 robotic arm, combining the state-of-the-art YOLOv5 CNN model for object detection with traditional feature detector, descriptor, and matching techniques. Specifically, we employ the FAST and BRISK algorithms for robust and efficient feature detector, descriptor, and matching. By integrating these techniques and utilizing a depth sensor camera to capture depth and color images, our system achieves real-time object detection and precise pose estimation, enabling the robotic arm to accurately pick objects. This integration of small-scale camera technology with advanced algorithms contributes to the advancement of industrial robotics, opening up new possibilities for automating challenging tasks and enhancing overall operational efficiency.
 
-####Keywords: *robotic arm, bin-picking, YOLOv5 CNN model, depth sensor camera, object detection and pose estimation*
+#### Keywords: 
+*robotic arm, bin-picking, YOLOv5 CNN model, depth sensor camera, object detection and pose estimation*
 
 
 
