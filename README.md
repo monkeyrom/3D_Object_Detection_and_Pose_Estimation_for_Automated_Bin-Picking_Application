@@ -1,9 +1,10 @@
 # <center>Bin-Picking Project</center>
 
 ### Abstract
-Robotic arms have gained popularity in various industries due to their accuracy and efficiency in completing tasks. In this study, we propose a novel method for automatic bin-picking using the Dobot CR5 robotic arm, combining the state-of-the-art YOLOv5 CNN model for object detection and the FAST and BRISK feature detection and matching methods for object pose estimation. The system utilizes the Intel RealSense D435i camera to capture depth and colour images, which are used as input data for object detection and pose estimation. The YOLOv5 CNN model enables real-time object detection, while the FAST and BRISK methods estimate the pose of the object, allowing the robotic arm to pick the object at the correct position and orientation. The proposed method demonstrates promising results and shows the potential for revolutionizing the field of robotics, particularly in the context of industrial automation, by improving efficiency and accuracy in object manipulation tasks.
+Robotic arms have gained popularity in various industries due to their accuracy and efficiency in completing tasks. In this study, we propose a method for automating bin-picking tasks using the Dobot CR5 robotic arm, combining the state-of-the-art YOLOv5 CNN model for object detection with traditional feature detector, descriptor, and matching techniques. Specifically, we employ the FAST and BRISK algorithms for robust and efficient feature detector, descriptor, and matching. By integrating these techniques and utilizing a depth sensor camera to capture depth and color images, our system achieves real-time object detection and precise pose estimation, enabling the robotic arm to accurately pick objects. This integration of small-scale camera technology with advanced algorithms contributes to the advancement of industrial robotics, opening up new possibilities for automating challenging tasks and enhancing overall operational efficiency.
 
-Keywords: *robotic arm, bin-picking, object detection, object pose estimation, CNN*
+Keywords: *robotic arm, bin-picking, YOLOv5 CNN model, depth sensor camera, object detection and pose estimation*
+
 
 
 ## Requirement
