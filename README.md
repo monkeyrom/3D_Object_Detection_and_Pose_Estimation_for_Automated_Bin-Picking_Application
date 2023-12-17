@@ -59,7 +59,7 @@ source $HOME/catkin_ws/devel/setup.bash
 
 ## 2.  FAST and BRISK Traditional object detection for pose estimation
 
-![FAST Technique](./pic/05.png)
+![FAST Technique](./pic/05.jpg)
 
 ## 3.  Run a terminal for running Yolo node
 
@@ -70,7 +70,7 @@ source $HOME/catkin_ws/devel/setup.bash
 * This command will run the node
   - yolo_listener
 
-![YOLOv5](./pic/04.png)
+![YOLOv5](./pic/04.jpg)
   
 ## 4.  Run a terminal for controlling the robot
 
@@ -82,11 +82,11 @@ source $HOME/catkin_ws/devel/setup.bash
   - listener
   - main_order
 
-![Robot Pose Calculation](./pic/06.png)
+![Robot Pose Calculation](./pic/06.jpg)
 
 ## Real Robotic Arm
 
-![Dobot CR5](./pic/11.png)
+![Dobot CR5](./pic/11.jpg)
 
 ### Intel Realsense D435i
 ![Intel Realsense D435i](./pic/dobot2.jpg)
