@@ -1,11 +1,11 @@
 # <center>3D Object Detection and Pose Estimation for Automated Bin-Picking Application</center>
 
 ### Abstract
-Robotic arms have gained popularity in various industries due to their accuracy and efficiency in completing tasks. In this study, we propose a method for automating bin-picking tasks using the Dobot CR5 robotic arm, combining the state-of-the-art YOLOv5 CNN model for object detection with traditional feature detector, descriptor, and matching techniques. Specifically, we employ the FAST and BRISK algorithms for robust and efficient feature detector, descriptor, and matching. By integrating these techniques and utilizing a depth sensor camera to capture depth and color images, our system achieves real-time object detection and precise pose estimation, enabling the robotic arm to accurately pick objects. This integration of small-scale camera technology with advanced algorithms contributes to the advancement of industrial robotics, opening up new possibilities for automating challenging tasks and enhancing overall operational efficiency.
+Robotic arms have gained popularity in various industries due to their accuracy and efficiency in completing tasks. In this study, we propose a method for automating bin-picking tasks using the Dobot CR5 robotic arm, combining the state-of-the-art YOLOv5 CNN model for object detection with traditional feature detectors, descriptors, and matching techniques. Specifically, we employ the FAST and BRISK algorithms for robust and efficient feature detectors, descriptors, and matching. By integrating these techniques and utilizing a depth sensor camera to capture depth and color images, our system achieves real-time object detection and precise pose estimation, enabling the robotic arm to pick objects accurately. This integration of small-scale camera technology with advanced algorithms contributes to the advancement of industrial robotics, opening up new possibilities for automating challenging tasks and enhancing overall operational efficiency.
 
 Keywords: *robotic arm, bin-picking, YOLOv5 CNN model, depth sensor camera, object detection and pose estimation*
 
-
+![Hybrid Technique](./pic/02.jpg)
 
 ## Requirement
 
@@ -19,18 +19,18 @@ Keywords: *robotic arm, bin-picking, YOLOv5 CNN model, depth sensor camera, obje
 cd $HOME/catkin_ws/src
 git clone https://github.com/Dobot-Arm/CR_ROS.git
 git clone https://github.com/introlab/find-object.git
-git clone https://github.com/monkeyrom/CR5_Project.git
+git clone https://github.com/monkeyrom/3D_Object_Detection_and_Pose_Estimation_for_Automated_Bin-Picking_Application.git
 ```
 ### Installing Realsense-ROS
 
-You need to install realsense-ros to using realsense2_camera package. The step to installing realsense-ros have shown [here](https://github.com/monkeyrom/realsense-ros).
+You need to install realsense-ros to use realsense2_camera package. The steps to installing realsense-ros have shown [here](https://github.com/monkeyrom/realsense-ros).
 
 ### building
 ```sh
 cd $HOME/catkin_ws/src/Bin-Picking
 catkin build
 ```
-### set the dobot type
+### Set the robot type
 ```sh
 echo "export DOBOT_TYPE=cr5" >> ~/.bashrc
 source ~/.bashrc
@@ -39,13 +39,13 @@ source $HOME/catkin_ws/devel/setup.bash
 
 ## 1.  Launch Project
 
-* Connect the robotic arm with following command, and default robot_ip is 192.168.1.6 
+* Connect the robotic arm with the following command, and the default robot_ip is 192.168.1.6 
 
 ```sh
     roslaunch CR5_Project CR5_with_realsense.launch
 ```
 
-* this command will launch 
+* This command will launch 
   - dobot_bringup
   - realsense camera pointcloud
   - find object 2d
@@ -55,42 +55,38 @@ source $HOME/catkin_ws/devel/setup.bash
 
 ![rviz display](./pic/rviz.png)
 
-### find object GUI
+### find object
 
-## 2.  Add object image for detection
+## 2.  FAST and BRISK Traditional object detection for pose estimation
 
-* Using find object gui for adding image
-  - > edit
-  - > add object from scene
-  - > take picture
-  - > crop object
+![FAST Technique](./pic/05.png)
 
-### tf synchronize
-
-## 3.  Run a terminal for running yolo node
+## 3.  Run a terminal for running Yolo node
 
 ```sh
     rosrun CR5_Project yolo_order.py
 ```
 
-* this command will run node
+* This command will run the node
   - yolo_listener
+
+![YOLOv5](./pic/04.png)
   
-## 4.  Run a terminal for controlling robot
+## 4.  Run a terminal for controlling the robot
 
 ```sh
     rosrun CR5_Project service_call
 ```
 
-* this command will run 2 nodes and spawn new terminal for commanding
+* This command will run 2 nodes and spawn a new terminal for commanding
   - listener
   - main_order
 
-### new terminal for input command
+![Robot Pose Calculation](./pic/06.png)
 
 ## Real Robotic Arm
 
-### Dobot CR5 
+![Dobot CR5](./pic/11.png)
 
 ### Intel Realsense D435i
 ![Intel Realsense D435i](./pic/dobot2.jpg)
