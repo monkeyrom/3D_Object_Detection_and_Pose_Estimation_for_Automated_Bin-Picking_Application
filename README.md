@@ -118,7 +118,7 @@ YOLOv5 detects objects in the scene and sends coordinates to the robot.
 
 ## 🎯 Object Detection & Pose Estimation
 
-### 🟢 Phase 1: YOLOv5 Detection
+### Phase 1: YOLOv5 Detection
 - Trained with a custom dataset on Roboflow (1431 images, YOLOv5l, 100 epochs)
 - Output: 2D bounding boxes and object class
 
@@ -128,7 +128,7 @@ To train the YOLOv5 model, a dataset was prepared using Roboflow. The dataset wa
 
 ![Train YOLOv5](./pic/Fig.5(b).jpg)
 
-## 🔵 Phase 2: FAST + BRISK for Pose Refinement
+## Phase 2: FAST + BRISK for Pose Refinement
 
 ### Feature detector — FAST
 
@@ -180,7 +180,7 @@ This will:
 
 In the experimental result and comparison, our hybrid method showed impressive performance. In terms of object detection, our approach achieved an AP50:95 score of 96.5%, underscoring its capabilities in accurately detecting objects at any orientation, and a pose estimation accuracy of 94.7% within angle error of 5°. Additionally, our hybrid method demonstrated efficient processing, with a minimal detection and pose estimation time of merely 0.32 s, indicating its suitability for real-time applications. 
 
-## ✅ Conclusion
+## Conclusion
 
 This project demonstrates a low-cost, accurate, and real-time bin-picking solution by combining the power of deep learning and classical computer vision. Using YOLOv5 and FAST-BRISK within a ROS-based framework, our system offers precise object detection and pose estimation with minimal hardware requirements. It’s a practical and scalable solution for industrial automation in manufacturing and logistics.
 
